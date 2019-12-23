@@ -4,4 +4,4 @@ For the Christmas holiday, I made a mod!  The Teladi Profit Protection Service h
 
 **Install**
 
-Unpack MissionSanta.zip and place the Thanksgiving directory in your extensions folder.
+Unpack MissionSanta.zip and place the MissionSanta directory in your extensions folder.
