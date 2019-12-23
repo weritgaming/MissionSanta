@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diff>
+    <add sel="/soundlibrary">
+        <sound id="86751343_normal" description="Quest" repeat="1" is3d="1" preload="0">
+            <sample start="Extensions\MissionSanta\voice-L044\86751343\normal"/>
+        </sound>
+        <sound id="86751343_comm" description="Argon NPC Male 1 / Misc Plot Characters: npc-player comms" repeat="1" is3d="1" preload="0">
+            <sample start="Extensions\MissionSanta\voice-L044\86751343\comm"/>
+        </sound>
+    </add>
+</diff>

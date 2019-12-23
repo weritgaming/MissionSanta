@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<diff> 
+	<!-- Update Default Traders' stock -->
+	<add pos="prepend" sel="/stocks/stock[@id='default_trader']">
+		<ware ref="santa" min="100" max="100" chance="100" />
+  </add>
+</diff>

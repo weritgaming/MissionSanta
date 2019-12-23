@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<diff> 
+	<add pos="prepend" sel="/paintmods">
+    <paint ware="santa" quality="1" hue="143" brightness="0.0" saturation="0.0" metal="0.4" pattern="extensions\MissionSanta\assets\textures\patterns\Santa" strength="1" scale="10" sharpness="100" invert="0" red="255" green="255" blue="255" alpha="255"/>
+  </add>
+</diff>

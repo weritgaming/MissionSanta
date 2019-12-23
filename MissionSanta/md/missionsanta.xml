@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mdscript name="MissionSanta" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="D:/x4_extract_2.5/libraries/md.xsd">
+    <cues>
+        <cue name="CreateRoom">
+            <conditions>
+                <check_any>
+                    <event_game_loaded/>
+                    <event_cue_signalled cue="md.Setup.GameStart"/>
+                </check_any>
+            </conditions>
+            <actions>
+
+                <create_cue_actor name="$Mission_Contact" cue="namespace" group="teladi.factionrepresentative">
+                    <page exact="86751343"/>
+                    <owner exact="faction.teladi"/>
+                    <skills>
+                        <skill type="management" min="6" max="15"/>
+                        <skill type="morale" min="6" max="15"/>
+                        <skill type="piloting" min="6" max="15"/>
+                        <skill type="engineering" min="6" max="15"/>
+                        <skill type="boarding" min="6" max="15"/>
+                    </skills>
+                </create_cue_actor>
+                <set_entity_traits entity="$Mission_Contact" missionactor="true" customhandler="true"/>
+
+                <set_value name="$FactionHeadquarters" exact="faction.teladi.representative.station" />
+                <set_value name="$Race" exact="$FactionHeadquarters.owner.primaryrace" />
+                <get_room_definition macro="$CorridorMacro" race="$Race" tags="tag.corridor" />
+                <get_room_definition macro="$RoomMacro" doors="$RoomDoors" tags="tag.office" />
+
+                <create_dynamic_interior object="$FactionHeadquarters" corridor="$CorridorMacro" room="$RoomMacro" interiorname="$Interior" corridorname="$Corridor" roomname="$Room" name="{86751343,1000}" roomtype="roomtype.office" seed="$FactionHeadquarters.seed" />
+                <find_npc_slot name="$RoomSlot" object="$Room" />
+                <do_if value="$RoomSlot">
+                    <debug_text text="'We have found a room slot on which to place the mission giver'" />
+                    <add_actor_to_room actor="$Mission_Contact" slot="$RoomSlot" />
+                </do_if>
+            </actions>
+            <cues>
+                <cue name="StartConversation" instantiate="true">
+                    <conditions>
+                        <check_any>
+                            <event_conversation_started actor="$Mission_Contact" />
+                            <event_conversation_returned_to_section section="default" actor="$Mission_Contact"/>
+                        </check_any>
+                    </conditions>
+                    <actions>
+                        <do_if value="not $MissionIntroCue.hasmission">
+                            <add_npc_line speaker="$Mission_Contact" line="1001" hidechoices="true" comment="Step1 Text."/>
+                            <add_player_choice_sub text="'Uh, sure?'" section="step1" choiceparam="event.object" baseparam="event.param2"/>
+                        </do_if>
+                        <do_else>
+                            <add_npc_line line="1006" hidechoices="true" comment="Already have mission Text."/>
+                        </do_else>
+                    </actions>
+                </cue>
+
+                <cue name="Open_From_Convo" instantiate="true">
+                    <conditions>
+                        <event_conversation_next_section actor="$Mission_Contact" />
+                    </conditions>
+                    <actions>
+                        <set_value name="$MissionIntroCue" exact="this"/>
+                        <do_if value="event.param == 'step1'">
+                            <add_npc_line line="1002" hidechoices="true" comment="Step1 Text."/>
+                            <add_player_choice_sub text="'Interesting, tell me more.'" tooltip="''" section="step2" choiceparam="event.object" baseparam="event.param2"/>
+                        </do_if>
+                        <do_if value="event.param == 'step2'">
+                            <do_if value="not $MissionIntroCue.hasmission">
+                                <add_npc_line line="1003" hidechoices="true" comment="Step2 Text."/>
+                                <add_player_choice_sub text="'Accept'" tooltip="'Accept Mission'" section="accept" choiceparam="event.object" baseparam="event.param2"/>
+                                <add_player_choice_sub text="'No, thanks.'" tooltip="'Reject Mission'" section="reject" choiceparam="event.object" baseparam="event.param2"/>
+                            </do_if>
+                            <do_else>
+                                <add_npc_line line="1006" hidechoices="true" comment="Already have mission Text."/>
+                            </do_else>
+                        </do_if>
+                        <do_if value="event.param == 'accept'">
+                            <add_npc_line line="1004" hidechoices="true" comment="Accept Text."/>
+
+                            <create_mission cue="$MissionIntroCue" type="missiontype.fight" name="readtext.{86751343}.{1007}" rewardtext="'1,000,000 Credits, 99x Santa Ship Skins'" description="readtext.{86751343}.{1008}" difficulty="level.trivial" faction="faction.teladi" />
+                            <create_ship name="$TestShip" zone="player.zone" macro="ship_par_m_corvette_01_b_macro">
+                                <paint ware="ware.santa" />
+                                <owner exact="faction.criminal"/>
+                                <pilot group="argon.pilot"/> 
+                                <safepos object="player.entity" min="60km" max="70km"/>
+                            </create_ship>
+                            <set_object_name object="$TestShip" name="'Santa Claus'" comment="rename"/>
+                            <do_all exact="2">
+                                <create_ship name="$TShip" zone="player.zone" macro="ship_arg_s_heavyfighter_02_a_macro">
+                                    <owner exact="$TestShip.owner" overridenpc="true" />
+                                    <paint ware="ware.santa" />
+                                    <pilot group="argon.pilot"/>
+                                    <loadout>
+                                        <level exact="1.0" />
+                                    </loadout>
+                                    <safepos object="$TestShip" min="300" max="3km" />
+                                </create_ship>
+                                <set_object_commander object="$TShip" commander="$TestShip" />
+                                <create_order id="'Escort'" object="$TShip" default="true">
+                                    <param name="target" value="$TestShip" />
+                                    <param name="formation" value="formationshape.pointguard" />
+                                    <param name="formationparam" value="200m" />
+                                </create_order>
+                            </do_all>
+
+                            <update_mission cue="$MissionIntroCue">
+                                <briefing>
+                                    <objective step="1" action="objective.destroy" object="$TestShip"/>
+                                </briefing>
+                            </update_mission>
+                            <set_objective cue="$MissionIntroCue" action="objective.destroy" object="$TestShip"/>
+
+                            <debug_text text="'Mission should be setup.'" />
+
+                        </do_if>
+                        <do_if value="event.param == 'reject'">
+                            <add_npc_line line="1005" hidechoices="true" comment="Reject Text."/>
+                        </do_if>
+                    </actions>
+                    <cues>
+                        <!-- <cue name="KeepAlive">
+                            <conditions>
+                                <event_cue_signalled/>
+                            </conditions>
+                        </cue> -->
+                        <cue name="ShipKilled">
+                            <conditions>
+                                <event_object_destroyed object="$TestShip" />
+                            </conditions>
+                            <actions>
+                                <reward_player money="1000000Cr"/>
+                                <add_inventory ware="ware.santa" entity="player.entity" exact="99" />
+                                <remove_mission cue="Open_From_Convo" type="completed" />
+                                <remove_actor_from_room actor="$Mission_Contact"/>
+                                <remove_dynamic_interior object="$FactionHeadquarters" interior="$Interior" />
+                                <cancel_cue cue="ShipKilled" />
+                            </actions>
+                        </cue>
+                        <cue name="AbortListener">
+                            <conditions>
+                                <event_mission_aborted cue="Open_From_Convo" />
+                            </conditions>
+                            <actions>
+                                <remove_mission cue="Open_From_Convo" type="aborted" />
+                                <cancel_cue cue="$MissionIntroCue" />
+                            </actions>
+                        </cue>
+                    </cues>
+                </cue>
+            </cues>
+        </cue>
+
+    </cues>
+</mdscript>
